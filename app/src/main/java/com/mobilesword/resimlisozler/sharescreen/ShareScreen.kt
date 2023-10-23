@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,11 +28,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import kotlinx.coroutines.launch
 
 
@@ -75,6 +80,12 @@ fun ShareScreen(viewModel: ShareViewModel, navController: NavController, title:S
                     .fillMaxWidth()
                     .height(400.dp)
             )
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+            ) {
+                AdmobBanner(modifier = Modifier.fillMaxWidth())
+            }
         Button(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,7 +93,7 @@ fun ShareScreen(viewModel: ShareViewModel, navController: NavController, title:S
             onClick = {
                 if (bitmap == null) {
                     viewModel.viewModelScope.launch {
-                        bitmap = viewModel.loadImage(url)
+                        bitmap = viewModel.loadImage(context,url)
                     }
                 } else {
                     // Bitmap mevcutsa, paylaş
@@ -93,11 +104,29 @@ fun ShareScreen(viewModel: ShareViewModel, navController: NavController, title:S
         ) {
             Text(text = "Resmi Paylaş")
         }
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+            ) {
+                AdmobBanner(modifier = Modifier.fillMaxWidth())
+            }
     }
     }
 
 }
-
+@Composable
+fun AdmobBanner(modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier = Modifier.fillMaxWidth(),
+        factory = { context ->
+            AdView(context).apply {
+                setAdSize(AdSize.BANNER)
+                adUnitId = "ca-app-pub-4275218970636966/7191831093"
+                loadAd(AdRequest.Builder().build())
+            }
+        }
+    )
+}
 
 
 

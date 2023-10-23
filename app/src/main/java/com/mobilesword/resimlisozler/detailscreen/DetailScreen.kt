@@ -3,6 +3,7 @@ package com.mobilesword.resimlisozler.detailscreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,20 +23,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.mobilesword.resimlisozler.sharescreen.AdmobBanner
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(viewModel: DetailViewModel, navController: NavController, categoryFileName: String,title:String) {
     val images by viewModel.images.observeAsState(emptyList())
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.fetchImages(categoryFileName)
     }
+
+    viewModel.loadInterstitial(context)
 
     if (images.isEmpty()) {
         Text(text = "Yükleniyor...")
@@ -67,13 +73,28 @@ fun DetailScreen(viewModel: DetailViewModel, navController: NavController, categ
                                 Image(
                                     painter = rememberImagePainter(item.resimurl),
                                     contentDescription = "",
-                                    modifier = Modifier.size(175.dp)
-                                    .clickable {
-                                        val image : String = item.resimurl
-                                        navController.navigate("share?image=$image?title=$title")
-                                    }
+                                    modifier = Modifier
+                                        .size(175.dp)
+                                        .clickable {
+                                            var adControl: Boolean = viewModel.controlInterstitial()
+                                            if (adControl) {
+                                                viewModel.showInterstitial(context, {
+                                                    val image: String = item.resimurl
+                                                    navController.navigate("share?image=$image?title=$title")
+                                                })
+                                            } else {
+                                                val image: String = item.resimurl
+                                                navController.navigate("share?image=$image?title=$title")
+                                            }
+                                        }
                                 )
                             }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp,top = 16.dp, bottom = 16.dp)
+                        ) {
+                            com.mobilesword.resimlisozler.categoryscreen.AdmobBanner(modifier = Modifier.fillMaxWidth())
                         }
                     }
                 }
